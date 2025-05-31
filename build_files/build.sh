@@ -1,37 +1,45 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -eo pipefail
+CONTEXT_PATH="$(realpath "$(dirname "$0")/..")" # should return /run/context
+BUILD_SCRIPTS_PATH="$(realpath "$(dirname "$0")")"
+MAJOR_VERSION_NUMBER="$(sh -c '. /usr/lib/os-release ; echo $VERSION_ID')"
+SCRIPTS_PATH="$(realpath "$(dirname "$0")/scripts")"
+export CONTEXT_PATH
+export SCRIPTS_PATH
+export MAJOR_VERSION_NUMBER
 
-set -ouex pipefail
+run_buildscripts_for() {
+    WHAT="$1"
+    shift
+    # Complex "find" expression here since there might not be any overrides
+    # Allows us to numerically sort scripts by stuff like "01-packages.sh" or whatever
+    # CUSTOM_NAME is required if we dont need or want the automatic name
+    find "${BUILD_SCRIPTS_PATH}/$WHAT" -maxdepth 1 -iname "*-*.sh" -type f -print0 | sort --zero-terminated --sort=human-numeric | while IFS= read -r -d $'\0' script ; do
+        if [ "${CUSTOM_NAME}" != "" ] ; then
+            WHAT=$CUSTOM_NAME
+        fi
+        printf "::group:: ===%s-%s===\n" "$WHAT" "$(basename "$script")"
+        "$(realpath "$script")"
+        printf "::endgroup::\n"
+    done
+}
 
-### Install packages
+copy_systemfiles_for() {
+    WHAT="$1"
+    shift
+    DISPLAY_NAME=$WHAT
+    if [ "${CUSTOM_NAME}" != "" ] ; then
+        DISPLAY_NAME=$CUSTOM_NAME
+    fi
+    printf "::group:: ===%s-file-copying===\n" "${DISPLAY_NAME}"
+    cp -avf "${CONTEXT_PATH}/$WHAT/." /
+    printf "::endgroup::\n"
+}
 
-# Packages can be installed from any enabled yum repo on the image.
-# RPMfusion repos are available by default in ublue main images
-# List of rpmfusion packages can be found here:
-# https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/39/x86_64/repoview/index.html&protocol=https&redirect=1
-
-# this installs a package from fedora repos
-# dnf5 install -y tmux krita
-
-# Install VSCode
-dnf5 config-manager addrepo --set=baseurl="https://packages.microsoft.com/yumrepos/vscode" --id="vscode"
-dnf5 config-manager setopt vscode.enabled=0
-dnf5 config-manager setopt vscode.gpgcheck=0
-dnf5 install --nogpgcheck --enable-repo="vscode" -y code
-
-# Copy VSCode setup hook
-mkdir -p /usr/share/ublue-os/user-setup.hooks.d
-cp /ctx/11-vscode-extensions.sh /usr/share/ublue-os/user-setup.hooks.d/11-vscode-extensions.sh
-chmod +x /usr/share/ublue-os/user-setup.hooks.d/11-vscode-extensions.sh
-
-# Use a COPR Example:
-#
-# dnf5 -y copr enable ublue-os/staging
-# dnf5 -y install package
-# Disable COPRs so they don't end up enabled on the final image:
-# dnf5 -y copr disable ublue-os/staging
-
-#### Example for enabling a System Unit File
-
+# Enable podman socket (from your original script)
 systemctl enable podman.socket
 
-cp /ctx/custom.just /usr/share/ublue-os/just/60-custom.just
+CUSTOM_NAME="base"
+copy_systemfiles_for files
+run_buildscripts_for scripts
+CUSTOM_NAME=
