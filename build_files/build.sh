@@ -26,22 +26,22 @@ run_buildscripts_for() {
 	done
 }
 
-copy_systemfiles_for() {
-	WHAT=$1
-	shift
-	DISPLAY_NAME=$WHAT
-	if [ "${CUSTOM_NAME}" != "" ] ; then
-		DISPLAY_NAME=$CUSTOM_NAME
-	fi
-	printf "::group:: ===%s-file-copying===\n" "${DISPLAY_NAME}"
-	cp -avf "${CONTEXT_PATH}/$WHAT/." /
-	printf "::endgroup::\n"
-}
+# copy_systemfiles_for() {
+# 	WHAT=$1
+# 	shift
+# 	DISPLAY_NAME=$WHAT
+# 	if [ "${CUSTOM_NAME}" != "" ] ; then
+# 		DISPLAY_NAME=$CUSTOM_NAME
+# 	fi
+# 	printf "::group:: ===%s-file-copying===\n" "${DISPLAY_NAME}"
+# 	cp -avf "${CONTEXT_PATH}/$WHAT/." /
+# 	printf "::endgroup::\n"
+# }
 
 # Enable podman socket (from your original script)
 systemctl enable podman.socket
 
 CUSTOM_NAME="base"
-copy_systemfiles_for files
+# copy_systemfiles_for files
 run_buildscripts_for .
 CUSTOM_NAME=
