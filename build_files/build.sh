@@ -10,7 +10,18 @@ set -ouex pipefail
 # https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/39/x86_64/repoview/index.html&protocol=https&redirect=1
 
 # this installs a package from fedora repos
-dnf5 install -y tmux krita
+# dnf5 install -y tmux krita
+
+# Install VSCode
+dnf5 config-manager addrepo --set=baseurl="https://packages.microsoft.com/yumrepos/vscode" --id="vscode"
+dnf5 config-manager setopt vscode.enabled=0
+dnf5 config-manager setopt vscode.gpgcheck=0
+dnf5 install --nogpgcheck --enable-repo="vscode" -y code
+
+# Copy VSCode setup hook
+mkdir -p /usr/share/ublue-os/user-setup.hooks.d
+cp /ctx/11-vscode-extensions.sh /usr/share/ublue-os/user-setup.hooks.d/11-vscode-extensions.sh
+chmod +x /usr/share/ublue-os/user-setup.hooks.d/11-vscode-extensions.sh
 
 # Use a COPR Example:
 #
