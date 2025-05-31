@@ -27,17 +27,20 @@ run_buildscripts_for() {
 }
 
 copy_systemfiles_for() {
-	WHAT=$1
-	shift
-	DISPLAY_NAME=$WHAT
-	if [ "${CUSTOM_NAME}" != "" ] ; then
-		DISPLAY_NAME=$CUSTOM_NAME
-	fi
-	printf "::group:: ===%s-file-copying===\n" "${DISPLAY_NAME}"
-	cp -avf "${CONTEXT_PATH}/$WHAT/." /
-	printf "::endgroup::\n"
+    WHAT="$1"
+    shift
+    DISPLAY_NAME=$WHAT
+    if [ "${CUSTOM_NAME}" != "" ] ; then
+        DISPLAY_NAME=$CUSTOM_NAME
+    fi
+    printf "::group:: ===%s-file-copying===\n" "${DISPLAY_NAME}"
+    if [ -d "/${WHAT}" ]; then
+        cp -avf "/${WHAT}/." /
+    else
+        echo "Directory /${WHAT} not found, skipping..."
+    fi
+    printf "::endgroup::\n"
 }
-
 # Enable podman socket (from your original script)
 systemctl enable podman.socket
 
