@@ -12,9 +12,6 @@ set -ouex pipefail
 # this installs a package from fedora repos
 dnf5 install -y tmux krita
 
-flatpak remote-add --if-not-exists --system flathub https://flathub.org/repo/flathub.flatpakrepo
-flatpak install --system --noninteractive -y md.obsidian.Obsidian
-
 # Use a COPR Example:
 #
 # dnf5 -y copr enable ublue-os/staging
@@ -25,3 +22,5 @@ flatpak install --system --noninteractive -y md.obsidian.Obsidian
 #### Example for enabling a System Unit File
 
 systemctl enable podman.socket
+
+cp /ctx/custom.just /usr/share/ublue-os/just/60-custom.just
