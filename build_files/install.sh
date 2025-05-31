@@ -7,5 +7,4 @@ flatpak remote-add --system --if-not-exists flathub https://flathub.org/repo/fla
 # Install flatpaks
 flatpak install --system -y flathub \
     com.discordapp.Discord \
-    org.libreoffice.LibreOffice \
-    com.spotify.Client
+    org.libreoffice.LibreOffice
