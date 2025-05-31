@@ -25,7 +25,6 @@ run_buildscripts_for() {
 		printf "::endgroup::\n"
 	done
 }
-
 copy_systemfiles_for() {
     WHAT="$1"
     shift
@@ -34,10 +33,23 @@ copy_systemfiles_for() {
         DISPLAY_NAME=$CUSTOM_NAME
     fi
     printf "::group:: ===%s-file-copying===\n" "${DISPLAY_NAME}"
+    
+    # Debug output
+    echo "DEBUG: Looking for directory /${WHAT}"
+    echo "DEBUG: Current working directory: $(pwd)"
+    echo "DEBUG: Contents of root:"
+    ls -la / | head -10
+    echo "DEBUG: Looking for /files specifically:"
+    ls -la /files 2>/dev/null || echo "/files does not exist"
+    
     if [ -d "/${WHAT}" ]; then
+        echo "DEBUG: Found /${WHAT}, copying contents..."
+        echo "DEBUG: Contents of /${WHAT}:"
+        find "/${WHAT}" -type f | head -5
         cp -avf "/${WHAT}/." /
+        echo "DEBUG: Copy completed"
     else
-        echo "Directory /${WHAT} not found, skipping..."
+        echo "ERROR: Directory /${WHAT} not found, skipping..."
     fi
     printf "::endgroup::\n"
 }
